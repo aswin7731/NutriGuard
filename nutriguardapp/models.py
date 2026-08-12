@@ -3,8 +3,9 @@ from django.db import models
 
 
 class logintable(models.Model):
-    email = models.CharField(max_length=100, null=True, blank=True)
+    username = models.CharField(max_length=100, null=True, blank=True)
     password = models.CharField(max_length=100, null=True, blank=True)
+    user_type=models.CharField(max_length=100,null=True,blank=True)
 
 
 class usertable(models.Model):

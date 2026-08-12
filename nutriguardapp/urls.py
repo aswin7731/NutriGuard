@@ -20,10 +20,11 @@ from django.urls import path
 from nutriguardapp.views import *
 
 urlpatterns = [
-    path('login',loginview.as_view(),name="login"),
+    path('',loginview.as_view(),name="login"),
     path('home',homepageview.as_view(),name="home"),
     path('complaints',complaintview.as_view(),name="complaints"),
     path('members',membersview.as_view(),name="members"),
     path('rating',ratingview.as_view(),name='rating'),
     path('users',usersview.as_view(),name='users')
 ]
+ 
