@@ -25,6 +25,8 @@ urlpatterns = [
     path('complaints',complaintview.as_view(),name="complaints"),
     path('members',membersview.as_view(),name="members"),
     path('rating',ratingview.as_view(),name='rating'),
-    path('users',usersview.as_view(),name='users')
+    path('users',usersview.as_view(),name='users'),
+    path('register',RegisterView.as_view(),name="Register"),
+    path('login',LoginView.as_view(),name="login"),
 ]
  
