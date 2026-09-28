@@ -28,5 +28,6 @@ urlpatterns = [
     path('users',usersview.as_view(),name='users'),
     path('register',RegisterView.as_view(),name="Register"),
     path('login',LoginView.as_view(),name="login"),
+    path('healthprofile/<int:user_id>',ProfileView.as_view(),name="login"),
 ]
  

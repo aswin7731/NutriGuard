@@ -13,11 +13,13 @@ class usertable(models.Model):
     age = models.IntegerField(null=True, blank=True)
     gender = models.CharField(max_length=100, null=True, blank=True)
     email = models.CharField(max_length=100, null=True, blank=True)
-    phone = models.CharField(max_length=15, null=True, blank=True)
     height = models.CharField(max_length=100, null=True, blank=True)
     weight = models.CharField(max_length=100, null=True, blank=True)
     bmi = models.CharField(max_length=100, null=True, blank=True)
+    health_condition=models.CharField(max_length=100,null=True,blank=True)
+    food_allergies=models.CharField(max_length=100,null=True,blank=True)
     login_id = models.ForeignKey(logintable,on_delete=models.CASCADE)
+
 
 
 class packetfoodtable(models.Model):
