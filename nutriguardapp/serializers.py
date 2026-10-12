@@ -26,18 +26,18 @@ class Packetfoodseializers(serializers.ModelSerializer):
 class Complaintserializers(serializers.ModelSerializer):
     class Meta:
         model:complaintstable
-        fields=['user_id','complaint','reply','send_date','reply_date']
+        fields=['user_id','subject','reply','send_date','reply_date','description']
 
 
 class Ratingserializers(serializers.ModelSerializer):
     class Meta:
         model=ratingtable
-        fields=['user_id','rating','send_date']
+        fields=['user_id','rating','send_date','review']
 
 class Memberserializers(serializers.ModelSerializer):
     class Meta:
         model=memberstable
-        fields=['user_id','name','age','gender','height','weight','bmi','health','allergies','is_pregnant','relation','created_time']
+        fields=['id','name','age','gender','height','weight','bmi','health_status','food_allergies','pregnancy_issues','relationship','trimester','conditions','pregnancy_month'   ]
 
 
 

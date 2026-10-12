@@ -298,10 +298,10 @@ class LoginView(APIView):
 class ProfileView(APIView):
 
     def get(self, request, user_id):
-        print("############### GET PROFILE user_id:", user_id)
+        print("GET PROFILE user_id:", user_id)
         response_dict = {}
 
-        user_obj = usertable.objects.filter(id=user_id).first()
+        user_obj = usertable.objects.filter(login_id_id=user_id).first()
         if not user_obj:
             response_dict['message'] = 'failed'
             return Response(response_dict, status=status.HTTP_404_NOT_FOUND)
@@ -311,7 +311,7 @@ class ProfileView(APIView):
         return Response(response_dict, status=status.HTTP_200_OK)
 
     def post(self, request, user_id):
-        print("############### PUT PROFILE user_id:", user_id)
+        print(" PUT PROFILE user_id:", user_id)
         response_dict = {}
 
         user_obj = usertable.objects.filter(login_id__id=user_id).first()
@@ -333,3 +333,176 @@ class ProfileView(APIView):
         response_dict['message'] = 'failed'
         response_dict['error']   = user_serial.errors
         return Response(response_dict, status=status.HTTP_400_BAD_REQUEST)
+
+class FamilyMembersView(APIView):
+   def get(self, request, user_id):
+        print("FAMILY MEMBERS GET METHOD CALLED")
+        print("USER ID:", user_id)
+
+        response_dict = {}
+        user_obj = usertable.objects.filter(login_id__id=user_id).first()
+        if not user_obj:
+            return Response({
+                'message': 'failed',
+                'error': 'User not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        members = memberstable.objects.filter(
+            user_id=user_obj
+        ).order_by('-id')
+
+        serializer = Memberserializers(members, many=True)
+        response_dict['message'] = 'success'
+        response_dict['members'] = serializer.data
+
+        print("GET RESPONSE:", response_dict)
+        return Response(response_dict, status=status.HTTP_200_OK)
+   def post(self,request,user_id):
+        print("$$$$$$$$$$$$ ADD FAMILY MEMBER user_id :",user_id,"DATA:",request.data)
+        response_dict={}
+
+        user_obj=usertable.objects.filter(login_id__id=user_id).first()
+        if not user_obj:
+            response_dict['message']='Failed'
+            response_dict['error']='User not found'
+            return Response(response_dict,status=status.HTTP_404_NOT_FOUND)
+
+        data=request.data.copy() if hasattr(request.data,"copy") else dict(request.data)
+
+
+    #Convert list fields(like health condition into comma sections)
+        for list_field in['condition','allergies']:
+            val= data.get(list_field)
+        if isinstance(val,list):
+            data[list_field]=",".join([str(x).strip() for x in val if str(x).strip()])
+
+    #set health summary description if not explicitly provided
+        if not data.get('health'):
+            health_status=data.get('health_status','Normal')
+            if health_status=='patient':
+                data['health']=data.get('condition') or 'patient'
+            elif health_status=='pregnant':
+                data['health']=f"pregnant-{data.get('trimester','')}".strip()
+            else:
+                data['health']='Healthy/Normal'
+
+        #set is_pregnant boolean based on health_status or parameter
+        if data.get('health_status')=='pregnant' or str(data.get('is_pregnant',"")).lower() in ['true','1']:
+            data['is_pregnant']=True
+        else:
+            data['is_pregnant']=False
+
+        serializers=Memberserializers(data=data)
+        if serializers.is_valid():
+            member_obj=serializers.save(user_id=user_obj)
+            response_dict['message']='success'
+            response_dict['member']=Memberserializers(member_obj).data
+            return Response(response_dict,status=status.HTTP_201_CREATED)
+
+        print("MEMBER ERROR:",serializers.errors)
+        response_dict['message']='failed'
+        response_dict['error']=serializers.errors
+        return Response(response_dict,status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+class MemberDetailsView(APIView):
+
+    def get(self, request, member_id):
+        print("######------------####### GET MEMBER DETAILS member_id:", member_id)
+
+        response_dict = {}
+        member = memberstable.objects.filter(user_id__id=member_id).first()
+        print('------------', member)
+
+        if not member:
+            response_dict['message'] = 'failed'
+            response_dict['error'] = 'Member not found'
+            return Response(response_dict, status=status.HTTP_404_NOT_FOUND)
+
+        response_dict['message'] = 'success'
+        response_dict['member'] = Memberserializers(member).data
+
+        return Response(response_dict, status=status.HTTP_200_OK)
+
+    def put(self, request, member_id):
+        print("############# UPDATE MEMBER member_id:", member_id, "DATA", request.data)
+
+        response_dict = {}
+        member = memberstable.objects.filter(id=member_id).first()
+
+        if not member:
+            response_dict['message'] = 'failed'
+            response_dict['error'] = 'Member not found'
+            return Response(response_dict, status=status.HTTP_404_NOT_FOUND)
+
+        data = request.data.copy()
+
+        # Convert list values to comma-separated strings
+        for list_field in ['conditions', 'allergies', 'food_allergies']:
+            value = data.get(list_field)
+
+            if isinstance(value, list):
+                data[list_field] = ', '.join(
+                    str(item).strip()
+                    for item in value
+                    if str(item).strip()
+                )
+
+        # Handle pregnancy and health status
+        health_status = data.get('health_status', '')
+
+        if health_status.lower() == 'pregnant':
+            data['is_pregnant'] = True
+
+            if not data.get('health'):
+                data['health'] = f"Pregnant - {data.get('trimester', '')}".strip()
+
+        elif health_status.lower() == 'patient':
+            data['is_pregnant'] = False
+
+            if not data.get('health'):
+                data['health'] = data.get('conditions') or 'Patient'
+
+        else:
+            data['is_pregnant'] = False
+
+            if not data.get('health'):
+                data['health'] = 'Healthy / Normal'
+
+        serializer = Memberserializers(
+            member,
+            data=data,
+            partial=True
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+
+            response_dict['message'] = 'success'
+            response_dict['member'] = serializer.data
+
+            return Response(response_dict, status=status.HTTP_200_OK)
+
+        response_dict['message'] = 'failed'
+        response_dict['errors'] = serializer.errors
+
+        return Response(response_dict, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, member_id):
+        print("$$$$$$$$$$$$$ DELETE MEMBER member_id:", member_id)
+
+        response_dict = {}
+        member = memberstable.objects.filter(id=member_id).first()
+
+        if not member:
+            response_dict['message'] = 'failed'
+            response_dict['errors'] = 'Member not found'
+            return Response(response_dict, status=status.HTTP_404_NOT_FOUND)
+
+        member.delete()
+
+        response_dict['message'] = 'success'
+
+        return Response(response_dict, status=status.HTTP_200_OK)

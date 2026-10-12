@@ -33,7 +33,8 @@ class packetfoodtable(models.Model):
 
 class complaintstable(models.Model):
     user_id = models.ForeignKey(usertable,on_delete=models.CASCADE)
-    complaint = models.TextField(null=True, blank=True)
+    subject = models.TextField(null=True, blank=True)
+    description=models.TextField(null=True, blank=True)
     reply = models.TextField(null=True, blank=True)
     send_date = models.DateTimeField(null=True, blank=True)
     reply_date = models.DateTimeField(null=True, blank=True)
@@ -43,21 +44,24 @@ class ratingtable(models.Model):
     user_id = models.ForeignKey(usertable,on_delete=models.CASCADE)
     rating = models.IntegerField(null=True, blank=True)
     send_date = models.DateTimeField(null=True, blank=True)
+    review= models.TextField(null=True, blank=True)
 
 
 class memberstable(models.Model):
     user_id = models.ForeignKey(usertable,on_delete=models.CASCADE,null=True,blank=True)
+    relationship=models.CharField(max_length=100, null=True, blank=True)
     name = models.CharField(max_length=100, null=True, blank=True)
     age = models.IntegerField(null=True, blank=True)
     gender = models.CharField(max_length=100, null=True, blank=True)
     height = models.CharField(max_length=100, null=True, blank=True)
     weight = models.CharField(max_length=100, null=True, blank=True)
     bmi = models.CharField(max_length=100, null=True, blank=True)
-    health = models.CharField(max_length=100, null=True, blank=True)
-    allergies = models.CharField(max_length=100, null=True, blank=True)
-    is_pregnant = models.BooleanField(default=False)
-    relation = models.CharField(max_length=100, null=True, blank=True)
-    created_time = models.DateTimeField(auto_now_add=True)
+    health_status = models.CharField(max_length=100, null=True, blank=True, default='Normal')
+    conditions = models.TextField(null=True, blank=True)
+    pregnancy_month = models.CharField(max_length=50, null=True, blank=True)
+    trimester = models.CharField(max_length=50, null=True, blank=True)
+    pregnancy_issues = models.TextField(null=True, blank=True)
+    food_allergies=models.CharField(max_length=100, null=True, blank=True)
 
 
 class bmitable(models.Model):
