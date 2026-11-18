@@ -32,6 +32,7 @@ urlpatterns = [
     path('family-members/<int:user_id>',FamilyMembersView.as_view(),name="family-members"),
     path('add-member/<int:user_id>',FamilyMembersView.as_view(),name="add-member"),
     path('member/<int:member_id>',MemberDetailsView.as_view(),name="member-detail"),
-    
+    path('send_complaint/<int:id>',complaintApiView.as_view(),name="send_complaints"),
+    path('rating/<int:user_id>',RatingApiView.as_view(),name="rating")
 ]
  

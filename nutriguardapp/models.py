@@ -1,4 +1,6 @@
 
+from datetime import timezone
+
 from django.db import models
 
 
@@ -30,14 +32,19 @@ class packetfoodtable(models.Model):
     ingredient = models.CharField(max_length=255, null=True, blank=True)
     image_url = models.ImageField(upload_to='products/', null=True, blank=True)
 
-
 class complaintstable(models.Model):
-    user_id = models.ForeignKey(usertable,on_delete=models.CASCADE)
+    user_id = models.ForeignKey(usertable, on_delete=models.CASCADE)
     subject = models.TextField(null=True, blank=True)
-    description=models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
     reply = models.TextField(null=True, blank=True)
-    send_date = models.DateTimeField(null=True, blank=True)
+    send_date = models.DateTimeField(auto_now_add=True)
     reply_date = models.DateTimeField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.reply and not self.reply_date:
+            self.reply_date = timezone.now()
+
+        super().save(*args, **kwargs)
 
 
 class ratingtable(models.Model):

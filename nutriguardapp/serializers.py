@@ -25,8 +25,8 @@ class Packetfoodseializers(serializers.ModelSerializer):
 
 class Complaintserializers(serializers.ModelSerializer):
     class Meta:
-        model:complaintstable
-        fields=['user_id','subject','reply','send_date','reply_date','description']
+        model = complaintstable
+        fields = [ 'subject', 'reply', 'reply_date', 'description']
 
 
 class Ratingserializers(serializers.ModelSerializer):

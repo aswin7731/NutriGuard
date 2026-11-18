@@ -161,6 +161,8 @@
 #                     "weight":user_obj.weight,
 #                     "bmi":user_obj.bmi,
 #                 },status=status.HTTP_200_OK)
+from datetime import timezone
+
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views import View
@@ -425,6 +427,7 @@ class MemberDetailsView(APIView):
         response_dict['member'] = Memberserializers(member).data
 
         return Response(response_dict, status=status.HTTP_200_OK)
+    
 
     def put(self, request, member_id):
         print("############# UPDATE MEMBER member_id:", member_id, "DATA", request.data)
@@ -506,3 +509,101 @@ class MemberDetailsView(APIView):
         response_dict['message'] = 'success'
 
         return Response(response_dict, status=status.HTTP_200_OK)
+
+    
+
+class complaintApiView(APIView):
+
+    def get(self, request, id):
+
+        user_obj = usertable.objects.filter(login_id=id).first()
+
+        complaints = complaintstable.objects.filter(user_id=user_obj)
+
+        serializer = Complaintserializers(complaints, many=True)
+
+        return Response({
+            'message': 'success',
+            'complaints': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    def post(self, request, id):
+
+        print("ID:", id)
+        print("DATA:", request.data)
+
+        user_obj = usertable.objects.filter(login_id_id=id).first()
+
+        print("USER:", user_obj)
+
+        if not user_obj:
+            return Response({'message': 'User not found'})
+
+        serializer = Complaintserializers(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save(user_id=user_obj)
+
+            print("SAVED:", serializer.data)
+
+            return Response({'message': 'success'})
+
+        print("ERROR:", serializer.errors)
+
+        return Response(serializer.errors)
+   
+    
+
+ 
+    
+class RatingApiView(APIView):
+    def get (self,request,user_id):
+        print("GET RATING user_id:",user_id)
+        user_obj=usertable.objects.filter(login_id_id=user_id).first()
+        if not user_obj:
+            user_obj=usertable.objects.filter(id=user_id).first()
+
+        if not user_obj:
+            return Response({'message':'failed','error':"user not found"},status=status.HTTP_404_NOT_FOUND)
+
+        rating_obj=ratingtable.objects.filter(user_id=user_obj).order_by("-id").first()
+        return Response({
+            'message':'success',
+            'rating':Ratingserializers(rating_obj).data if rating_obj else None
+        },status=status.HTTP_200_OK)
+
+    def post(self,request,user_id):
+        print("POST RATING user_id:",user_id,"DATA:",request.data)
+        user_obj=usertable.objects.filter(login_id_id=user_id).first()
+        if not user_obj:
+            user_obj=usertable.objects.filter(id=user_id).first()
+
+        if not user_obj:
+            return Response({'message':'failed','error':"user not found"},status=status.HTTP_404_NOT_FOUND)
+
+        rating_val=request.data.get('rating')
+        review_val=request.data.get("review"," ")
+
+        if rating_val is None:
+            return Response({'message':'failed','error':"Rating value is required"},status=status.HTTP_400_BAD_REQUEST)
+
+        from django.utils import timezone
+        rating_obj=ratingtable.objects.filter(user_id=user_obj).first()
+        if rating_obj:
+            rating_obj.rating=int(rating_val)
+            rating_obj.rating=review_val
+            rating_obj.send_date=timezone.now()
+            rating_obj.save()
+        else:
+            rating_obj=ratingtable.objects.create(
+                user_id=user_obj,
+                rating=int(rating_val),
+                review=review_val,
+                send_date=timezone.now()
+
+            )
+
+        return Response({
+            'messsage':'success',
+            'rating':Ratingserializers(rating_obj).data
+        },status=status.HTTP_200_OK)
