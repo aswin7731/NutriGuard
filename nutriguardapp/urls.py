@@ -33,6 +33,12 @@ urlpatterns = [
     path('add-member/<int:user_id>',FamilyMembersView.as_view(),name="add-member"),
     path('member/<int:member_id>',MemberDetailsView.as_view(),name="member-detail"),
     path('send_complaint/<int:id>',complaintApiView.as_view(),name="send_complaints"),
-    path('rating/<int:user_id>',RatingApiView.as_view(),name="rating")
+    path('rating/<int:user_id>',RatingApiView.as_view(),name="rating"),
+    path('chatbot/<int:user_id>', ChatBotView.as_view(), name="chatbot-api"),
+    path('scan-food/<int:user_id>',ScanFoodView.as_view(),name="scan-food"),
+    path('recent-scans/<int:user_id>',RecentScansView.as_view(),name="recent-scans"),
+    path('saved-products/<int:user_id>', SavedProductView.as_view(), name="saved-products"),
+    path('save-product/<int:user_id>', SavedProductView.as_view(), name="save-product"),
+    path('delete-saved-product/<int:item_id>', RemoveSavedProductView.as_view(), name="delete-saved-product"),
 ]
  
